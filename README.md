@@ -1,139 +1,265 @@
-# Atlas — AI Knowledge Assistant (RAG Portfolio Project)
 
-A full-stack, source-aware knowledge assistant. Upload PDF/TXT files, index text passages, ask questions and inspect the passages used to answer. **This is a portfolio prototype, not a production multi-tenant document service.**
+# Atlas — AI Knowledge Assistant
 
-## Features
+### Full-Stack Document Q&A Using Google Gemini, RAG, React & FastAPI
 
-- React/Vite frontend with drag-and-drop uploads and source cards
-- FastAPI document ingestion, text extraction and overlapping chunks
-- **Zero-key mode:** SQLite + keyword retrieval and verbatim source excerpts (free local demo)
-- **AI mode:** OpenAI embeddings (`text-embedding-3-small`) and Responses API answer generation using retrieved context
-- **Postgres mode:** PostgreSQL + pgvector cosine similarity via Docker Compose
-- Document listing, deletion, upload validation, CORS allowlist
-- Demo handbook with answerable questions and tests for ingestion/storage
+Atlas is a full-stack AI-powered knowledge assistant that allows users to upload documents, search their contents using natural-language questions, and receive context-aware answers with supporting source references.
 
-## Requirements
+It demonstrates Retrieval-Augmented Generation (RAG), semantic embeddings, document processing, REST API development, and modern frontend integration.
 
-- Python 3.10+ (3.12 recommended)
-- Node.js version compatible with your chosen Vite build (22.12+ recommended)
-- Optional: Docker Desktop for PostgreSQL/pgvector setup
-- Optional: An OpenAI API key with available API credits (API usage may incur costs)
+> **Project status:** Functional portfolio prototype. Not intended for production use without additional security, evaluation, and deployment work.
 
-## Fastest start — no Docker, no API key needed
+## Key Features
+
+- Upload and manage PDF and TXT documents.
+- Extract text and split documents into searchable passages.
+- Generate semantic document embeddings using Google Gemini.
+- Retrieve relevant passages based on the user's question.
+- Generate context-grounded answers using a Gemini language model.
+- Display source references and retrieved document excerpts.
+- Responsive React-based chat interface.
+- FastAPI backend with REST endpoints.
+- SQLite-based local document storage.
+- Optional PostgreSQL/pgvector configuration included.
+
+## Technology Stack
+
+| Layer | Technologies |
+|---|---|
+| Frontend | React, JavaScript, Vite, CSS |
+| Backend | Python, FastAPI |
+| Language Model | Google Gemini API |
+| Embeddings | Gemini Embedding Model |
+| AI Architecture | Retrieval-Augmented Generation |
+| Database | SQLite; optional PostgreSQL/pgvector |
+| API | REST, JSON |
+| Development | Git, GitHub, VS Code |
+
+## RAG Architecture
+
+```mermaid
+flowchart TD
+    A[User uploads PDF or TXT] --> B[FastAPI Backend]
+    B --> C[Text Extraction and Chunking]
+    C --> D[Gemini Embeddings]
+    D --> E[(Document Storage)]
+
+    F[User Question] --> G[Query Embedding]
+    G --> H[Relevant Passage Retrieval]
+    E --> H
+
+    H --> I[Gemini Language Model]
+    F --> I
+    I --> J[Answer with Source References]
+    J --> K[React Chat Interface]
+```
+
+### How It Works
+
+**1. Document ingestion:** Users upload PDF or TXT files through the frontend.
+
+**2. Text processing:** FastAPI extracts text and divides it into overlapping chunks.
+
+**3. Embedding generation:** The application creates vector representations of the passages using Gemini's embedding API.
+
+**4. Semantic retrieval:** A question is converted into a query embedding and matched against indexed passages.
+
+**5. Answer generation:** Relevant passages are passed to Gemini as grounding context.
+
+**6. Source attribution:** Atlas displays an answer alongside relevant source passages.
+
+## Project Structure
+
+```text
+atlas-ai-knowledge-assistant/
+├── backend/
+│   ├── app/
+│   │   ├── main.py
+│   │   ├── ai.py
+│   │   ├── config.py
+│   │   ├── ingestion.py
+│   │   └── storage.py
+│   ├── tests/
+│   ├── requirements.txt
+│   └── Dockerfile/
+├── frontend/
+│   ├── src/
+│   │   ├── App.jsx
+│   │   ├── main.jsx
+│   │   └── style.css
+│   └── package.json
+├── sample_docs/
+├── .env.example
+├── .gitignore
+├── docker-compose.yml
+└── README.md
+```
+
+## Local Installation
+
+### Requirements
+
+- Python 3.10+
+- Node.js and npm
+- Google Gemini API key
+- Git
+
+### 1. Clone the repository
 
 ```bash
-# Extract project ZIP, open terminal in its root
-cd knowledge-assistant-portfolio
+git clone https://github.com/md-shihabulislam/atlas-ai-knowledge-assistant.git
 
-# Terminal 1 — backend
+cd atlas-ai-knowledge-assistant
+```
+
+### 2. Configure environment variables
+
+Copy `.env.example` to `.env` in the project root.
+
+On Windows PowerShell:
+
+```powershell
+Copy-Item .env.example .env
+```
+
+Configure your `.env`:
+
+```dotenv
+GEMINI_API_KEY=YOUR_GEMINI_API_KEY
+GEMINI_CHAT_MODEL=gemini-3.5-flash-lite
+GEMINI_EMBEDDING_MODEL=gemini-embedding-2
+
+DATABASE_URL=
+CORS_ORIGINS=http://localhost:5173,http://127.0.0.1:5173
+```
+
+The configured Gemini models must be available to your API account.
+
+Never commit your actual API key.
+
+### 3. Start the backend
+
+```bash
 cd backend
-python -m venv .venv
-# Windows PowerShell: .venv\Scripts\Activate.ps1
-# macOS/Linux: source .venv/bin/activate
-pip install -r requirements.txt
-uvicorn app.main:app --reload --port 8000
 
-# Terminal 2 — frontend (from project root)
+python -m venv .venv
+```
+
+Activate the environment:
+
+Windows PowerShell:
+
+```powershell
+.\.venv\Scripts\Activate.ps1
+```
+
+macOS/Linux:
+
+```bash
+source .venv/bin/activate
+```
+
+Install dependencies and start FastAPI:
+
+```bash
+pip install -r requirements.txt
+
+python -m uvicorn app.main:app --reload
+```
+
+Backend: http://localhost:8000
+
+API documentation: http://localhost:8000/docs
+
+### 4. Start the frontend
+
+Open another terminal in the project's frontend directory:
+
+```bash
 cd frontend
 npm install
 npm run dev
 ```
 
-Open http://localhost:5173 and upload `sample_docs/example_company_handbook.txt`. Ask "How many days of annual leave are provided?". The offline mode returns relevant passages, **not** an LLM-written answer. This honestly shows retrieval before generative synthesis is configured.
+Frontend: http://localhost:5173
 
-## Turn on AI RAG locally
+### 5. Test the application
 
-1. Copy `.env.example` to `.env` in the project root.
-2. Set `OPENAI_API_KEY=...` in `.env`, kept **only on the backend**, never inside frontend source code. You can change `OPENAI_CHAT_MODEL` if needed; the default is `gpt-4.1-mini`.
-3. **Restart the backend** from the `backend` directory. The app loads `.env` from the root.
-4. Re-upload documents indexed in offline mode. Embeddings are computed on ingestion, so old SQLite rows contain no vectors.
-5. Ask a question. The app searches embedded chunks and requests a grounded answer with source labels [1], [2], etc.
+1. Open the frontend in your browser.
+2. Upload the example handbook from `sample_docs`.
+3. Wait until the document is indexed.
+4. Ask a question about the handbook.
+5. Inspect the generated answer and source passages.
 
-**Important:** You need API credits independent of any ChatGPT subscription. Do not upload private/client files to third-party services without authorisation. API processing and data handling are subject to the provider's terms.
+## API Endpoints
 
-## Docker Compose (PostgreSQL + pgvector)
-
-With Docker Desktop running, from project root:
-
-```bash
-cp .env.example .env     # On Windows, use Copy-Item .env.example .env
-# Edit .env if using AI mode
-# Start all services
-docker compose up --build
-```
-
-- Frontend: http://localhost:5173
-- API documentation: http://localhost:8000/docs
-- Database: PostgreSQL at port 5433 (for local inspection)
-
-Docker Compose sets `DATABASE_URL` to PostgreSQL and enables pgvector. With no `OPENAI_API_KEY`, it uses Postgres full-text retrieval. To enable semantic vector retrieval, set the key and **re-upload documents**.
-
-**Security note:** Docker credentials are intentionally development-only. Change them and add authentication, rate limits, per-user access isolation, and TLS before any public deployment. Never publicly expose the sample database credentials.
-
-## Architecture
-
-```mermaid
-flowchart TD
-    A[React frontend] --> B[FastAPI endpoints]
-    B --> C[PDF / TXT extraction]
-    C --> D[Overlapping text chunks]
-    D --> E{API key configured?}
-    E -- Yes --> F[OpenAI embeddings]
-    E -- No --> G[Keyword index]
-    F --> H[(SQLite vectors or PostgreSQL pgvector)]
-    G --> H
-    A --> I[Ask a question]
-    I --> J[Query vector or keyword search]
-    H --> J
-    J --> K[Top relevant passages]
-    K --> L{AI enabled?}
-    L -- Yes --> M[LLM grounded answer]
-    L -- No --> N[Verbatim excerpts only]
-    M --> O[Answer and source cards]
-    N --> O
-```
-
-## API summary
-
-| Method | Endpoint | Purpose |
+| Method | Endpoint | Description |
 |---|---|---|
-| GET | `/api/health` | Mode / health indicator |
-| GET | `/api/documents` | List indexed documents |
-| POST | `/api/documents` | Upload PDF or TXT (max 8MB; PDF max 50 pages) |
-| DELETE | `/api/documents/{id}` | Delete indexed document |
-| POST | `/api/chat` | Retrieve passages and optionally generate grounded answer |
+| GET | /api/health | Check API status |
+| GET | /api/documents | List indexed documents |
+| POST | /api/documents | Upload a document |
+| DELETE | /api/documents/{id} | Delete a document |
+| POST | /api/chat | Retrieve context and generate an answer |
 
-Example chat payload: `{"question": "What is the annual leave policy?"}`
+Example question payload:
+
+```json
+{
+  "question": "Summarize the uploaded document."
+}
+```
 
 ## Testing
+
+A backend test suite is included.
+
+To run it:
 
 ```bash
 cd backend
 python -m pytest tests -q
 ```
 
-These tests cover text extraction, chunking, SQLite insert/search/delete and cosine scoring. **They do not test live OpenAI API calls, the full Docker/Postgres path, or factual accuracy of model output.**
+The tests should be run against the current Gemini-integrated code before their results are reported.
 
-## Portfolio evidence checklist
+Live model responses, retrieval quality, and the optional Docker deployment require separate validation.
 
-1. Actual welcome screen and uploaded document list
-2. PDF/text upload and passage indexing
-3. Chat result with citations and visible source excerpts (AI mode)
-4. Architecture diagram + stack
-5. Test output, failure case, and short walkthrough video
+## Current Limitations
 
-**Do not claim** this prototype includes authentication, multitenancy, OCR, agent tool use, comprehensive evals, or production-grade security. These are planned enhancements.
+- No user authentication or account management.
+- No persistent multi-turn conversation memory.
+- No production-grade multi-user document isolation.
+- No comprehensive RAG accuracy benchmarking.
+- Document analysis and evaluative responses require further refinement.
+- API requests are subject to Gemini availability and usage limits.
 
-## Suggested next milestones
+## Planned Improvements
 
-- Authentication + per-user document access, file retention and audit logs
-- Hybrid search, reranking, user-selectable source documents
-- RAG evaluation dataset (answer correctness, citation correctness, retrieval recall)
-- Secure deployment to a cloud environment with CI/CD
-- Optional local embeddings / open-source LLM support
+- Conversation memory and chat history.
+- Document comparison and analytical review.
+- Hybrid retrieval and relevance reranking.
+- Improved source citations.
+- Authentication and secure multi-user access.
+- Cloud deployment and CI/CD.
+- Automated RAG evaluation.
 
-## Portfolio name
+## Security
 
-**Atlas — AI Knowledge Assistant | LLM, RAG, React & Python**
+This is a development prototype.
 
-Describe this as a *personal demonstration project* until independently tested and deployed. Do not present it as a completed client project.
+- Store credentials in the local `.env` file.
+- Never commit API keys or private uploaded documents.
+- Use fictional documents for public demonstrations.
+- Add authentication, access controls, rate limiting, and secure file handling before public deployment.
+
+## Author
+
+**Md Shihabul Islam**
+
+AI Automation & Full-Stack Developer
+
+GitHub: https://github.com/md-shihabulislam
+
+## Disclaimer
+
+This is an independently developed portfolio demonstration project. It is not presented as a commissioned client project or a production-ready enterprise platform.
