@@ -1,0 +1,17 @@
+NORTHSTAR LABS — SAMPLE EMPLOYEE HANDBOOK
+This is a fictional document for testing the RAG Knowledge Assistant.
+
+WORKING HOURS
+Core collaboration hours are Monday through Friday, 10:00 to 15:00 local time. Employees may arrange the remainder of their schedule with their manager. The standard workweek is 40 hours.
+
+REMOTE WORK
+Team members may work remotely three days per week, subject to team needs and manager approval. All company devices must use disk encryption and multi-factor authentication. Confidential documents must not be shared using personal accounts.
+
+ANNUAL LEAVE
+Full-time employees receive 20 days of annual leave per calendar year, excluding public holidays. Leave requests should normally be submitted at least 10 business days before the intended start date. Managers approve requests based on workload and staffing.
+
+EXPENSES
+Work-related expenses above $100 require manager approval before purchase. Valid expense claims must include an itemized receipt and be submitted within 30 days of the expense date.
+
+CUSTOMER SUPPORT
+Customers may contact support Monday through Friday from 09:00 to 18:00. Standard support requests have a target response time of two business days. Critical security incidents should be escalated immediately to the security team.
